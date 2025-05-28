@@ -21,101 +21,99 @@ import {
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-interface Patient {
-  patientId: number;
+interface Doctor {
+  doctorId: number;
   name: string;
-  mobile: string;
-  email: string;
-  address: string;
-  gender: string;
-  age: number;
+  specialization: string;
   registrationNumber: string;
+  email: string;
+  mobile: string;
   isActive: boolean;
+  departmentId: number;
+  departmentName: string;
 }
 
-const Patients: React.FC = () => {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+const Doctors: React.FC = () => {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [orderBy, setOrderBy] = useState<keyof Patient>("name");
+  const [orderBy, setOrderBy] = useState<keyof Doctor>("name");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const navigate = useNavigate();
 
-  const fetchPatients = async () => {
+  const fetchDoctors = async () => {
     try {
-      const response = await axios.get<Patient[]>(
-        "https://localhost:7065/api/v1/Patients"
-      );
-      setPatients(response.data);
-      setFilteredPatients(response.data);
+      const response = await axios.get<Doctor[]>("https://localhost:7065/api/v1/doctors");
+      setDoctors(response.data);
+      setFilteredDoctors(response.data);
       setLoading(false);
     } catch (err) {
-      console.error("An error occurred:", err);
-      setError("Failed to load patients.");
+      console.error("Fetch error:", err);
+      setError("Failed to load doctors.");
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPatients();
+    fetchDoctors();
   }, []);
 
   useEffect(() => {
-    const filtered = patients.filter((p) =>
-      p.name.toLowerCase().includes(search.toLowerCase())
+    const filtered = doctors.filter((d) =>
+      d.name.toLowerCase().includes(search.toLowerCase())
     );
-    setFilteredPatients(filtered);
-  }, [search, patients]);
+    setFilteredDoctors(filtered);
+  }, [search, doctors]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
 
   const handleEdit = (id: number) => {
-    navigate(`/edit-patient/${id}`);
+    navigate(`/edit-doctor/${id}`);
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this patient?")) return;
+    if (!window.confirm("Are you sure you want to delete this doctor?")) return;
     try {
-      await axios.delete(`https://localhost:7065/api/v1/Patients/${id}`);
-      alert("Patient deleted successfully.");
-      fetchPatients();
+      await axios.delete(`https://localhost:7065/api/v1/doctors/${id}`);
+      alert("Doctor deleted successfully.");
+      fetchDoctors();
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Failed to delete patient.");
+      alert("Failed to delete doctor.");
     }
   };
 
   const handleBulkDelete = async () => {
     if (
       selectedIds.length === 0 ||
-      !window.confirm("Are you sure you want to delete the selected patients?")
+      !window.confirm("Are you sure you want to delete selected doctors?")
     )
       return;
 
     try {
       await Promise.all(
         selectedIds.map((id) =>
-          axios.delete(`https://localhost:7065/api/v1/Patients/${id}`)
+          axios.delete(`https://localhost:7065/api/v1/doctors/${id}`)
         )
       );
-      alert("Selected patients deleted successfully.");
+      alert("Selected doctors deleted successfully.");
       setSelectedIds([]);
-      fetchPatients();
+      fetchDoctors();
     } catch (error) {
       console.error("Bulk delete error:", error);
-      alert("Failed to delete selected patients.");
+      alert("Failed to delete selected doctors.");
     }
   };
 
-  const handleSort = (property: keyof Patient) => {
+  const handleSort = (property: keyof Doctor) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -132,43 +130,41 @@ const Patients: React.FC = () => {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelectedIds = paginatedPatients.map((p) => p.patientId);
-      setSelectedIds((prev) => Array.from(new Set([...prev, ...newSelectedIds])));
+      const newSelected = paginatedDoctors.map((d) => d.doctorId);
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...newSelected])));
     } else {
       const newSelected = selectedIds.filter(
-        (id) => !paginatedPatients.map((p) => p.patientId).includes(id)
+        (id) => !paginatedDoctors.map((d) => d.doctorId).includes(id)
       );
       setSelectedIds(newSelected);
     }
   };
 
   const handleCheckboxClick = (id: number) => {
-    setSelectedIds((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((selectedId) => selectedId !== id)
-        : [...prevSelected, id]
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
     );
   };
 
   const isSelected = (id: number) => selectedIds.includes(id);
 
-  const sortedPatients = [...filteredPatients].sort((a, b) => {
+  const sortedDoctors = [...filteredDoctors].sort((a, b) => {
     if (a[orderBy] < b[orderBy]) return order === "asc" ? -1 : 1;
     if (a[orderBy] > b[orderBy]) return order === "asc" ? 1 : -1;
     return 0;
   });
 
-  const paginatedPatients = sortedPatients.slice(
+  const paginatedDoctors = sortedDoctors.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
-  const allSelectedOnPage = paginatedPatients.every((p) => selectedIds.includes(p.patientId));
+  const allSelectedOnPage = paginatedDoctors.every((d) => selectedIds.includes(d.doctorId));
 
   return (
     <Box p={3}>
       <Typography variant="h4" gutterBottom>
-        Patients
+        Doctors
       </Typography>
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
@@ -180,8 +176,8 @@ const Patients: React.FC = () => {
           size="small"
         />
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="primary" onClick={() => navigate("/add-patient")}>
-            Add Patient
+          <Button variant="contained" color="primary" onClick={() => navigate("/add-doctor")}>
+            Add Doctor
           </Button>
           {selectedIds.length > 0 && (
             <Button variant="contained" color="error" onClick={handleBulkDelete}>
@@ -204,10 +200,8 @@ const Patients: React.FC = () => {
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={allSelectedOnPage}
+                      indeterminate={selectedIds.length > 0 && !allSelectedOnPage}
                       onChange={handleSelectAllClick}
-                      indeterminate={
-                        selectedIds.length > 0 && !allSelectedOnPage
-                      }
                     />
                   </TableCell>
                   <TableCell>
@@ -219,49 +213,41 @@ const Patients: React.FC = () => {
                       Name
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell>Mobile</TableCell>
                   <TableCell>Email</TableCell>
+                  <TableCell>Mobile</TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={orderBy === "gender"}
-                      direction={orderBy === "gender" ? order : "asc"}
-                      onClick={() => handleSort("gender")}
+                      active={orderBy === "specialization"}
+                      direction={orderBy === "specialization" ? order : "asc"}
+                      onClick={() => handleSort("specialization")}
                     >
-                      Gender
+                      Specialization
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={orderBy === "age"}
-                      direction={orderBy === "age" ? order : "asc"}
-                      onClick={() => handleSort("age")}
-                    >
-                      Age
-                    </TableSortLabel>
-                  </TableCell>
+                  <TableCell>Department</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedPatients.map((patient) => (
-                  <TableRow key={patient.patientId} selected={isSelected(patient.patientId)}>
+                {paginatedDoctors.map((doctor) => (
+                  <TableRow key={doctor.doctorId} selected={isSelected(doctor.doctorId)}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        checked={isSelected(patient.patientId)}
-                        onChange={() => handleCheckboxClick(patient.patientId)}
+                        checked={isSelected(doctor.doctorId)}
+                        onChange={() => handleCheckboxClick(doctor.doctorId)}
                       />
                     </TableCell>
-                    <TableCell>{patient.name}</TableCell>
-                    <TableCell>{patient.mobile}</TableCell>
-                    <TableCell>{patient.email}</TableCell>
-                    <TableCell>{patient.gender}</TableCell>
-                    <TableCell>{patient.age}</TableCell>
+                    <TableCell>{doctor.name}</TableCell>
+                    <TableCell>{doctor.email}</TableCell>
+                    <TableCell>{doctor.mobile}</TableCell>
+                    <TableCell>{doctor.specialization}</TableCell>
+                    <TableCell>{doctor.departmentName}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={1} justifyContent="flex-end">
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => handleEdit(patient.patientId)}
+                          onClick={() => handleEdit(doctor.doctorId)}
                         >
                           Edit
                         </Button>
@@ -269,7 +255,7 @@ const Patients: React.FC = () => {
                           size="small"
                           variant="outlined"
                           color="error"
-                          onClick={() => handleDelete(patient.patientId)}
+                          onClick={() => handleDelete(doctor.doctorId)}
                         >
                           Delete
                         </Button>
@@ -277,10 +263,10 @@ const Patients: React.FC = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {paginatedPatients.length === 0 && (
+                {paginatedDoctors.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} align="center">
-                      No patients found.
+                      No doctors found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -289,7 +275,7 @@ const Patients: React.FC = () => {
           </TableContainer>
           <TablePagination
             component="div"
-            count={filteredPatients.length}
+            count={filteredDoctors.length}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
@@ -302,4 +288,4 @@ const Patients: React.FC = () => {
   );
 };
 
-export default Patients;
+export default Doctors;
