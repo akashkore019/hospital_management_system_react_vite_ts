@@ -31,7 +31,7 @@ const AddDoctor: React.FC = () => {
     try {
       await axios.post("https://localhost:7065/api/v1/doctors", doctor);
       alert("Doctor added successfully!");
-      navigate("/doctors");
+      navigate("/doctor");
     } catch (err) {
       console.error("Add error:", err);
       alert("Failed to add doctor.");

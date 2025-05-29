@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import config from "../config";
 
 interface Patient {
   patientId: number;
@@ -33,7 +34,7 @@ const EditPatient: React.FC = () => {
 
   const fetchPatient = async () => {
     try {
-      const response = await axios.get<Patient>(`https://localhost:7065/api/v1/Patients/${id}`);
+    const response = await axios.get(`${config.apiUrl}Patients/${id}`);
       setPatient(response.data);
     } catch (err) {
       console.error("Fetch error:", err);

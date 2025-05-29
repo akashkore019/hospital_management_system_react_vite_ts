@@ -1,7 +1,8 @@
 import React from "react";
 import { Box } from "@mui/material";
-import Header from "./Header";
-import Sidebar from "./Sidebar";
+import Header from "./header";
+import Sidebar from "./sidebar";
+import { motion } from "framer-motion";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,7 +17,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Header />
       <Sidebar />
       <Box
-        component="main"
+        component={motion.main}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
         sx={{
           marginLeft: `${drawerWidth}px`,
           marginTop: `${appBarHeight}px`,
