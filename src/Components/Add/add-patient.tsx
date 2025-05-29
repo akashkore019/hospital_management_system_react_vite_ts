@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -20,6 +20,12 @@ interface PatientInput {
   mobile: string;
   registrationNumber: string;
   isActive: boolean;
+  doctorId: string; // new field for doctor selection
+}
+
+interface Doctor {
+  id: string;
+  name: string;
 }
 
 const AddPatient: React.FC = () => {
@@ -34,7 +40,25 @@ const AddPatient: React.FC = () => {
     mobile: "",
     registrationNumber: "",
     isActive: true,
+    doctorId: "",
   });
+
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+  // Fetch doctors on mount
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.get(
+          "https://localhost:7065/api/v1/Doctors"
+        );
+        setDoctors(response.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors:", error);
+      }
+    };
+    fetchDoctors();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -94,6 +118,27 @@ const AddPatient: React.FC = () => {
         <MenuItem value="Female">Female</MenuItem>
         <MenuItem value="Other">Other</MenuItem>
       </TextField>
+
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Doctor"
+        name="doctorId"
+        select
+        value={patient.doctorId}
+        onChange={handleChange}
+        required
+      >
+        <MenuItem value="">
+          <em>Select Doctor</em>
+        </MenuItem>
+        {doctors.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id}>
+            {doc.name}
+          </MenuItem>
+        ))}
+      </TextField>
+
       <TextField
         fullWidth
         margin="normal"

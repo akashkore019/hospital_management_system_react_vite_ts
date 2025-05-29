@@ -49,7 +49,9 @@ const Doctors: React.FC = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get<Doctor[]>("https://localhost:7065/api/v1/doctors");
+      const response = await axios.get<Doctor[]>(
+        "https://localhost:7065/api/v1/doctors"
+      );
       setDoctors(response.data);
       setFilteredDoctors(response.data);
       setLoading(false);
@@ -123,7 +125,9 @@ const Doctors: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -159,34 +163,52 @@ const Doctors: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const allSelectedOnPage = paginatedDoctors.every((d) => selectedIds.includes(d.doctorId));
+  const allSelectedOnPage = paginatedDoctors.every((d) =>
+    selectedIds.includes(d.doctorId)
+  );
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Doctors
-      </Typography>
+    <Box p={3} mt={8} mx="0 auto">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        {/* Left: Title + Search */}
+        <Stack direction="row" spacing={3} alignItems="center">
+          <Typography variant="h4" gutterBottom>
+            Doctors
+          </Typography>
+          <TextField
+            label="Search by Name"
+            variant="outlined"
+            value={search}
+            onChange={handleSearchChange}
+            size="small"
+          />
+        </Stack>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-        <TextField
-          label="Search by Name"
-          variant="outlined"
-          value={search}
-          onChange={handleSearchChange}
-          size="small"
-        />
-        <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="primary" onClick={() => navigate("/add-doctor")}>
+        {/* Right: Action Buttons */}
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/add-doctor")}
+          >
             Add Doctor
           </Button>
           {selectedIds.length > 0 && (
-            <Button variant="contained" color="error" onClick={handleBulkDelete}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleBulkDelete}
+            >
               Delete Selected ({selectedIds.length})
             </Button>
           )}
         </Stack>
       </Stack>
-
       {loading ? (
         <CircularProgress />
       ) : error ? (
@@ -200,7 +222,9 @@ const Doctors: React.FC = () => {
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={allSelectedOnPage}
-                      indeterminate={selectedIds.length > 0 && !allSelectedOnPage}
+                      indeterminate={
+                        selectedIds.length > 0 && !allSelectedOnPage
+                      }
                       onChange={handleSelectAllClick}
                     />
                   </TableCell>
@@ -230,7 +254,10 @@ const Doctors: React.FC = () => {
               </TableHead>
               <TableBody>
                 {paginatedDoctors.map((doctor) => (
-                  <TableRow key={doctor.doctorId} selected={isSelected(doctor.doctorId)}>
+                  <TableRow
+                    key={doctor.doctorId}
+                    selected={isSelected(doctor.doctorId)}
+                  >
                     <TableCell padding="checkbox">
                       <Checkbox
                         checked={isSelected(doctor.doctorId)}
@@ -243,7 +270,11 @@ const Doctors: React.FC = () => {
                     <TableCell>{doctor.specialization}</TableCell>
                     <TableCell>{doctor.departmentName}</TableCell>
                     <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        justifyContent="flex-end"
+                      >
                         <Button
                           size="small"
                           variant="outlined"

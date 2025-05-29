@@ -82,7 +82,8 @@ const Patients: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this patient?")) return;
+    if (!window.confirm("Are you sure you want to delete this patient?"))
+      return;
     try {
       await axios.delete(`https://localhost:7065/api/v1/Patients/${id}`);
       alert("Patient deleted successfully.");
@@ -125,7 +126,9 @@ const Patients: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -133,7 +136,9 @@ const Patients: React.FC = () => {
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelectedIds = paginatedPatients.map((p) => p.patientId);
-      setSelectedIds((prev) => Array.from(new Set([...prev, ...newSelectedIds])));
+      setSelectedIds((prev) =>
+        Array.from(new Set([...prev, ...newSelectedIds]))
+      );
     } else {
       const newSelected = selectedIds.filter(
         (id) => !paginatedPatients.map((p) => p.patientId).includes(id)
@@ -163,28 +168,47 @@ const Patients: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const allSelectedOnPage = paginatedPatients.every((p) => selectedIds.includes(p.patientId));
+  const allSelectedOnPage = paginatedPatients.every((p) =>
+    selectedIds.includes(p.patientId)
+  );
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Patients
-      </Typography>
+    <Box p={3} mt={8} mx="0 auto">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        {/* Left: Title + Search */}
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography variant="h4" gutterBottom>
+            Patients
+          </Typography>
+          <TextField
+            label="Search by Name"
+            variant="outlined"
+            value={search}
+            onChange={handleSearchChange}
+            size="small"
+          />
+        </Stack>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-        <TextField
-          label="Search by Name"
-          variant="outlined"
-          value={search}
-          onChange={handleSearchChange}
-          size="small"
-        />
+        {/* Right: Action Buttons */}
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="primary" onClick={() => navigate("/add-patient")}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/add-patient")}
+          >
             Add Patient
           </Button>
           {selectedIds.length > 0 && (
-            <Button variant="contained" color="error" onClick={handleBulkDelete}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleBulkDelete}
+            >
               Delete Selected ({selectedIds.length})
             </Button>
           )}
@@ -244,7 +268,10 @@ const Patients: React.FC = () => {
               </TableHead>
               <TableBody>
                 {paginatedPatients.map((patient) => (
-                  <TableRow key={patient.patientId} selected={isSelected(patient.patientId)}>
+                  <TableRow
+                    key={patient.patientId}
+                    selected={isSelected(patient.patientId)}
+                  >
                     <TableCell padding="checkbox">
                       <Checkbox
                         checked={isSelected(patient.patientId)}
@@ -257,7 +284,11 @@ const Patients: React.FC = () => {
                     <TableCell>{patient.gender}</TableCell>
                     <TableCell>{patient.age}</TableCell>
                     <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        justifyContent="flex-end"
+                      >
                         <Button
                           size="small"
                           variant="outlined"
